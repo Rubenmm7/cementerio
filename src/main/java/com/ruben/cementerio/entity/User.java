@@ -1,5 +1,11 @@
 package com.ruben.cementerio.entity;
 
+
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +28,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,4 +52,44 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "rol_id", nullable = false)
     private Rol rol;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.rol == null || this.rol.getTipo() == null) {
+            return java.util.Collections.emptyList();
+        }
+        return java.util.Collections.singletonList(
+            new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + this.rol.getTipo().name())
+        );
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
