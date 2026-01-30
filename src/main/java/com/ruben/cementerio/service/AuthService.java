@@ -1,8 +1,8 @@
 package com.ruben.cementerio.service;
 
-import com.ruben.cementerio.dto.auth.JwtResponse;
-import com.ruben.cementerio.dto.auth.LoginRequest;
-import com.ruben.cementerio.security.JwtUtils;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,8 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.ruben.cementerio.dto.auth.JwtResponse;
+import com.ruben.cementerio.dto.auth.LoginRequest;
+import com.ruben.cementerio.security.JwtUtils;
 
 @Service
 public class AuthService {
