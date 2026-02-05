@@ -1,22 +1,40 @@
 package com.ruben.cementerio.config;
 
-import com.ruben.cementerio.entity.*;
-import com.ruben.cementerio.entity.parcela.EstadoParcela;
-import com.ruben.cementerio.entity.parcela.TipoParcela;
-import com.ruben.cementerio.repository.*;
+import java.time.LocalDate;
+import java.util.Set;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.Set;
+import com.ruben.cementerio.entity.Ayuntamiento;
+import com.ruben.cementerio.entity.Cementerio;
+import com.ruben.cementerio.entity.Cliente;
+import com.ruben.cementerio.entity.Concesion;
+import com.ruben.cementerio.entity.Parcela;
+import com.ruben.cementerio.entity.Rol;
+import com.ruben.cementerio.entity.TipoRol;
+import com.ruben.cementerio.entity.User;
+import com.ruben.cementerio.entity.Zona;
+import com.ruben.cementerio.entity.parcela.EstadoParcela;
+import com.ruben.cementerio.entity.parcela.TipoParcela;
+import com.ruben.cementerio.repository.AyuntamientoRepository;
+import com.ruben.cementerio.repository.CementerioRepository;
+import com.ruben.cementerio.repository.ClienteRepository;
+import com.ruben.cementerio.repository.ConcesionRepository;
+import com.ruben.cementerio.repository.DifuntoRepository;
+import com.ruben.cementerio.repository.ParcelaRepository;
+import com.ruben.cementerio.repository.RolRepository;
+import com.ruben.cementerio.repository.UserRepository;
+import com.ruben.cementerio.repository.ZonaRepository;
 
 @Component
 public class InitializeData implements CommandLineRunner {
 
     private final RolRepository rolRepository;
     private final UserRepository userRepository;
+    private final ClienteRepository clienteRepository;
     private final AyuntamientoRepository ayuntamientoRepository;
     private final CementerioRepository cementerioRepository;
     private final ZonaRepository zonaRepository;
@@ -25,13 +43,14 @@ public class InitializeData implements CommandLineRunner {
     private final ConcesionRepository concesionRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public InitializeData(RolRepository rolRepository, UserRepository userRepository,
+    public InitializeData(RolRepository rolRepository, UserRepository userRepository, ClienteRepository clienteRepository,
                           AyuntamientoRepository ayuntamientoRepository, CementerioRepository cementerioRepository,
                           ZonaRepository zonaRepository, ParcelaRepository parcelaRepository,
                           DifuntoRepository difuntoRepository, ConcesionRepository concesionRepository,
                           PasswordEncoder passwordEncoder) {
         this.rolRepository = rolRepository;
         this.userRepository = userRepository;
+        this.clienteRepository = clienteRepository;
         this.ayuntamientoRepository = ayuntamientoRepository;
         this.cementerioRepository = cementerioRepository;
         this.zonaRepository = zonaRepository;
@@ -45,107 +64,70 @@ public class InitializeData implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
 
-        // 1. Roles
+        //Limpieza y Roles
         try { rolRepository.deleteInvalidRoles(); } catch (Exception e) {}
 
         Rol roleAdmin = rolRepository.findByTipo(TipoRol.SUPERADMIN)
                 .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.SUPERADMIN).build()));
-        Rol roleOperador = rolRepository.findByTipo(TipoRol.OPERADOR)
-                .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.OPERADOR).build()));
         Rol roleCliente = rolRepository.findByTipo(TipoRol.CLIENTE)
                 .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.CLIENTE).build()));
 
-        // 2. Usuarios
-        User admin = userRepository.findByEmail("admin@cementerio.com").orElseGet(() -> {
-            User u = User.builder()
-                    .nombre("Admin General")
-                    .email("admin@cementerio.com")
-                    .password(passwordEncoder.encode("admin123"))
-                    .telefono("600000000") // Añadido por si es obligatorio
-                    .direccion("Oficina Central")
-                    .roles(Set.of(roleAdmin))
-                    .build();
-            return userRepository.save(u);
-        });
-
-        User cliente = userRepository.findByEmail("cliente@familia.com").orElseGet(() -> {
-            User u = User.builder()
-                    .nombre("Juan Pérez")
-                    .email("cliente@familia.com")
-                    .password(passwordEncoder.encode("cliente123"))
-                    .telefono("666777888")
-                    .direccion("Calle Falsa 123")
-                    .roles(Set.of(roleCliente))
-                    .build();
-            return userRepository.save(u);
-        });
-
-        // 3. Estructura del Cementerio
+        // 2. Estructura Base (Ayuntamiento)
         if (ayuntamientoRepository.count() == 0) {
-            
-            // A. Ayuntamiento (¡OJO! Aquí añadí el teléfono obligatorio)
             Ayuntamiento ayto = Ayuntamiento.builder()
-                    .nombre("Ayuntamiento de Springfield")
-                    .direccion("Plaza Mayor 1")
-                    .telefono("911223344") // <--- ESTO FALTABA
+                    .nombre("Ayuntamiento Springfield")
+                    .direccion("Plaza Mayor")
+                    .telefono("911223344")
                     .build();
             ayuntamientoRepository.save(ayto);
 
-            // B. Cementerio
             Cementerio cementerio = Cementerio.builder()
-                    .nombre("Cementerio Municipal El Descanso")
-                    .direccion("Carretera del Norte km 5")
+                    .nombre("Cementerio Municipal")
+                    .direccion("Norte Km 5")
                     .poblacion("Springfield")
                     .ayuntamiento(ayto)
                     .build();
             cementerioRepository.save(cementerio);
 
-            // C. Zona
-            Zona zonaNorte = Zona.builder()
-                    .nombre("Patio Norte - Los Olivos")
-                    .numeroFilas(5)
-                    .numeroColumnas(10)
-                    .cementerio(cementerio)
-                    .build();
-            zonaRepository.save(zonaNorte);
+            Zona zona = Zona.builder().nombre("Zona A").numeroFilas(5).numeroColumnas(10).cementerio(cementerio).build();
+            zonaRepository.save(zona);
 
-            // D. Parcelas
-            Parcela nicho1 = Parcela.builder()
-                    .fila(1)
-                    .columna(1)
-                    .tipo(TipoParcela.NICHO)
-                    .estado(EstadoParcela.OCUPADO)
-                    .capacidad(3)
-                    .zona(zonaNorte)
-                    .build();
-            parcelaRepository.save(nicho1);
+            Parcela nicho = Parcela.builder().fila(1).columna(1).tipo(TipoParcela.NICHO).estado(EstadoParcela.OCUPADO).capacidad(3).zona(zona).build();
+            parcelaRepository.save(nicho);
 
-            // 4. Datos de Negocio
+            // Primero creamos la entidad Cliente
+            Cliente familiaPerez = new Cliente();
+            familiaPerez.setApellidos("Familia Pérez");
+            familiaPerez.setDni("12345678Z");
+            clienteRepository.save(familiaPerez);
+
+            //Ahora creamos el 'User' vinculado al Cliente y al Ayuntamiento
+            if (userRepository.findByEmail("cliente@cementerio.com").isEmpty()) {
+                User usuarioJuan = User.builder()
+                        .nombre("Juan Pérez")
+                        .email("cliente@cementerio.com")
+                        .password(passwordEncoder.encode("1234"))
+                        .telefono("666000000")
+                        .direccion("Calle Falsa 123")
+                        .roles(Set.of(roleCliente))
+                        .cliente(familiaPerez) // Vinculamos user a cliente
+                        .ayuntamiento(ayto)    // Vinculamos user a ayuntamiento
+                        .build();
+                userRepository.save(usuarioJuan);
+            }
             
-            // Difunto
-            Difunto abuelo = Difunto.builder()
-                    .nombre("Antonio")
-                    .apellidos("García López")
-                    .dni("12345678A")
-                    .fechaDefuncion(LocalDate.now().minusYears(2))
-                    .fechaEnterramiento(LocalDate.now().minusYears(2).plusDays(1))
-                    .parcela(nicho1)
-                    .biografia("Amado abuelo.")
-                    .build();
-            difuntoRepository.save(abuelo);
-
-            // Concesión
+            //La Concesión se vincula al CLIENTE no al usuario
             Concesion contrato = Concesion.builder()
-                    .cliente(cliente)
-                    .parcela(nicho1)
-                    .fechaInicio(LocalDate.now().minusYears(2))
-                    .fechaFin(LocalDate.now().plusYears(48))
-                    .precio(1500.00)
+                    .cliente(familiaPerez)
+                    .parcela(nicho)
+                    .fechaInicio(LocalDate.now().minusYears(1))
+                    .fechaFin(LocalDate.now().plusYears(49))
+                    .precio(1000.0)
                     .activa(true)
                     .build();
             concesionRepository.save(contrato);
-            
-            System.out.println("✅ DATOS DE PRUEBA CARGADOS CORRECTAMENTE");
+
+            System.out.println(" DATOS CARGADOS CORRECTAMENTE");
         }
     }
 }

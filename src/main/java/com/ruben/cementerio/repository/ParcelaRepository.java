@@ -9,6 +9,8 @@ import com.ruben.cementerio.entity.Parcela;
 
 @Repository
 public interface ParcelaRepository extends JpaRepository<Parcela, Long> {
+    
+    List<Parcela> findByZonaCementerioId(Long cementerioId);
+
     List<Parcela> findByZonaId(Long zonaId);
-    List<Parcela> findByCementerioId(Long cementerioId);
 }

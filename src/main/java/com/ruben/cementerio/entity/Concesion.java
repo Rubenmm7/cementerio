@@ -29,14 +29,14 @@ public class Concesion {
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private Double precio; // Precio histórico
+    private boolean activa;
+
 
     @ManyToOne
-    @JoinColumn(name = "user_id") // Vinculamos con la tabla de usuarios
-    private User cliente;
+    @JoinColumn(name = "cliente_id") // Vinculamos con la tabla de usuarios
+    private Cliente cliente;
 
     @ManyToOne
     @JoinColumn(name = "parcela_id")
     private Parcela parcela;
-
-    private boolean activa; // true = vigente, false = caducada
 }
