@@ -34,24 +34,38 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(authEntryPointJwt)
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("SUPERADMIN")
-                .requestMatchers("/api/users/**").hasAnyRole("SUPERADMIN", "OPERADOR")
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .exceptionHandling(ex ->
+            ex.authenticationEntryPoint(authEntryPointJwt)
+        )
+        .authorizeHttpRequests(auth -> auth
 
-        return http.build();
-    }
+            // Publico
+            .requestMatchers(
+                "/",
+                "/index.html",
+                "/api/auth/**"
+            ).permitAll()
+
+            // Solo ADMIN1
+            .requestMatchers("/api/admin/**")
+            .hasRole("SUPERADMIN")
+
+            // Cualqiuera autenticado
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(
+            jwtAuthenticationFilter,
+            UsernamePasswordAuthenticationFilter.class
+        );
+
+    return http.build();
+}
+
 }

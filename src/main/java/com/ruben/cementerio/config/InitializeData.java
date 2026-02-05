@@ -1,5 +1,7 @@
 package com.ruben.cementerio.config;
 
+import java.util.Set;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -49,7 +51,7 @@ public class InitializeData implements CommandLineRunner {
                     .password(passwordEncoder.encode("admin123"))
                     .telefono("600000000")
                     .direccion("Calle Admin 1")
-                    .rol(roleAdmin)
+                    .roles(Set.of(roleAdmin))
                     .build();
             userRepository.save(admin);
         }
@@ -61,7 +63,7 @@ public class InitializeData implements CommandLineRunner {
                     .password(passwordEncoder.encode("operador123"))
                     .telefono("611111111")
                     .direccion("Calle Operador 1")
-                    .rol(roleOperador)
+                    .roles(Set.of(roleOperador))
                     .build();
             userRepository.save(operador);
         }
@@ -73,7 +75,7 @@ public class InitializeData implements CommandLineRunner {
                     .password(passwordEncoder.encode("cliente123"))
                     .telefono("622222222")
                     .direccion("Calle Cliente 1")
-                    .rol(roleCliente)
+                    .roles(Set.of(roleCliente))
                     .build();
             userRepository.save(cliente);
         }

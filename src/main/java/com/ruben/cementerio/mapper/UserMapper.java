@@ -1,5 +1,7 @@
 package com.ruben.cementerio.mapper;
 
+import java.util.Set;
+
 import com.ruben.cementerio.dto.UserRequestDTO;
 import com.ruben.cementerio.dto.UserResponseDTO;
 import com.ruben.cementerio.entity.Rol;
@@ -15,7 +17,7 @@ public class UserMapper {
                 .password(dto.getPassword())
                 .telefono(dto.getTelefono())
                 .direccion(dto.getDireccion())
-                .rol(rol)
+                .roles(Set.of(rol))
                 .build();
     }
 
@@ -25,7 +27,7 @@ public class UserMapper {
                 .id(user.getId())
                 .nombre(user.getNombre())
                 .email(user.getEmail())
-                .rol(user.getRol().getTipo())
+                .rol(user.getRoles().stream().findFirst().map(Rol::getTipo).orElse(null))
                 .build();
     }
 }

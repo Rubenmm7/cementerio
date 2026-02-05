@@ -1,7 +1,6 @@
 package com.ruben.cementerio.security;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,11 +18,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(
-            new SimpleGrantedAuthority(
-                "ROLE_" + user.getRol().getTipo().name()
-            )
-        );
+        return user.getRoles().stream()
+                .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getTipo().name()))
+                .toList();
     }
 
     @Override
