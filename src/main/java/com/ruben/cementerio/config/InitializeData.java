@@ -1,28 +1,43 @@
 package com.ruben.cementerio.config;
 
-import java.util.Set;
-
+import com.ruben.cementerio.entity.*;
+import com.ruben.cementerio.entity.parcela.EstadoParcela;
+import com.ruben.cementerio.entity.parcela.TipoParcela;
+import com.ruben.cementerio.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ruben.cementerio.entity.Rol;
-import com.ruben.cementerio.entity.TipoRol;
-import com.ruben.cementerio.entity.User;
-import com.ruben.cementerio.repository.RolRepository;
-import com.ruben.cementerio.repository.UserRepository;
+import java.time.LocalDate;
+import java.util.Set;
 
 @Component
 public class InitializeData implements CommandLineRunner {
 
     private final RolRepository rolRepository;
     private final UserRepository userRepository;
+    private final AyuntamientoRepository ayuntamientoRepository;
+    private final CementerioRepository cementerioRepository;
+    private final ZonaRepository zonaRepository;
+    private final ParcelaRepository parcelaRepository;
+    private final DifuntoRepository difuntoRepository;
+    private final ConcesionRepository concesionRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public InitializeData(RolRepository rolRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public InitializeData(RolRepository rolRepository, UserRepository userRepository,
+                          AyuntamientoRepository ayuntamientoRepository, CementerioRepository cementerioRepository,
+                          ZonaRepository zonaRepository, ParcelaRepository parcelaRepository,
+                          DifuntoRepository difuntoRepository, ConcesionRepository concesionRepository,
+                          PasswordEncoder passwordEncoder) {
         this.rolRepository = rolRepository;
         this.userRepository = userRepository;
+        this.ayuntamientoRepository = ayuntamientoRepository;
+        this.cementerioRepository = cementerioRepository;
+        this.zonaRepository = zonaRepository;
+        this.parcelaRepository = parcelaRepository;
+        this.difuntoRepository = difuntoRepository;
+        this.concesionRepository = concesionRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -30,54 +45,107 @@ public class InitializeData implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
 
-        // Limpiar roles inválidos que no están en el enum TipoRol
-        rolRepository.deleteInvalidRoles();
+        // 1. Roles
+        try { rolRepository.deleteInvalidRoles(); } catch (Exception e) {}
 
-        // Crear roles
         Rol roleAdmin = rolRepository.findByTipo(TipoRol.SUPERADMIN)
                 .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.SUPERADMIN).build()));
-        
         Rol roleOperador = rolRepository.findByTipo(TipoRol.OPERADOR)
                 .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.OPERADOR).build()));
-        
         Rol roleCliente = rolRepository.findByTipo(TipoRol.CLIENTE)
                 .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.CLIENTE).build()));
 
-        // Crear usuarios de prueba
-        if (userRepository.findByEmail("admin@cementerio.com").isEmpty()) {
-            User admin = User.builder()
-                    .nombre("Admin User")
+        // 2. Usuarios
+        User admin = userRepository.findByEmail("admin@cementerio.com").orElseGet(() -> {
+            User u = User.builder()
+                    .nombre("Admin General")
                     .email("admin@cementerio.com")
                     .password(passwordEncoder.encode("admin123"))
-                    .telefono("600000000")
-                    .direccion("Calle Admin 1")
+                    .telefono("600000000") // Añadido por si es obligatorio
+                    .direccion("Oficina Central")
                     .roles(Set.of(roleAdmin))
                     .build();
-            userRepository.save(admin);
-        }
+            return userRepository.save(u);
+        });
 
-        if (userRepository.findByEmail("operador@cementerio.com").isEmpty()) {
-            User operador = User.builder()
-                    .nombre("Operador User")
-                    .email("operador@cementerio.com")
-                    .password(passwordEncoder.encode("operador123"))
-                    .telefono("611111111")
-                    .direccion("Calle Operador 1")
-                    .roles(Set.of(roleOperador))
-                    .build();
-            userRepository.save(operador);
-        }
-
-        if (userRepository.findByEmail("cliente@cementerio.com").isEmpty()) {
-            User cliente = User.builder()
-                    .nombre("Cliente User")
-                    .email("cliente@cementerio.com")
+        User cliente = userRepository.findByEmail("cliente@familia.com").orElseGet(() -> {
+            User u = User.builder()
+                    .nombre("Juan Pérez")
+                    .email("cliente@familia.com")
                     .password(passwordEncoder.encode("cliente123"))
-                    .telefono("622222222")
-                    .direccion("Calle Cliente 1")
+                    .telefono("666777888")
+                    .direccion("Calle Falsa 123")
                     .roles(Set.of(roleCliente))
                     .build();
-            userRepository.save(cliente);
+            return userRepository.save(u);
+        });
+
+        // 3. Estructura del Cementerio
+        if (ayuntamientoRepository.count() == 0) {
+            
+            // A. Ayuntamiento (¡OJO! Aquí añadí el teléfono obligatorio)
+            Ayuntamiento ayto = Ayuntamiento.builder()
+                    .nombre("Ayuntamiento de Springfield")
+                    .direccion("Plaza Mayor 1")
+                    .telefono("911223344") // <--- ESTO FALTABA
+                    .build();
+            ayuntamientoRepository.save(ayto);
+
+            // B. Cementerio
+            Cementerio cementerio = Cementerio.builder()
+                    .nombre("Cementerio Municipal El Descanso")
+                    .direccion("Carretera del Norte km 5")
+                    .poblacion("Springfield")
+                    .ayuntamiento(ayto)
+                    .build();
+            cementerioRepository.save(cementerio);
+
+            // C. Zona
+            Zona zonaNorte = Zona.builder()
+                    .nombre("Patio Norte - Los Olivos")
+                    .numeroFilas(5)
+                    .numeroColumnas(10)
+                    .cementerio(cementerio)
+                    .build();
+            zonaRepository.save(zonaNorte);
+
+            // D. Parcelas
+            Parcela nicho1 = Parcela.builder()
+                    .fila(1)
+                    .columna(1)
+                    .tipo(TipoParcela.NICHO)
+                    .estado(EstadoParcela.OCUPADO)
+                    .capacidad(3)
+                    .zona(zonaNorte)
+                    .build();
+            parcelaRepository.save(nicho1);
+
+            // 4. Datos de Negocio
+            
+            // Difunto
+            Difunto abuelo = Difunto.builder()
+                    .nombre("Antonio")
+                    .apellidos("García López")
+                    .dni("12345678A")
+                    .fechaDefuncion(LocalDate.now().minusYears(2))
+                    .fechaEnterramiento(LocalDate.now().minusYears(2).plusDays(1))
+                    .parcela(nicho1)
+                    .biografia("Amado abuelo.")
+                    .build();
+            difuntoRepository.save(abuelo);
+
+            // Concesión
+            Concesion contrato = Concesion.builder()
+                    .cliente(cliente)
+                    .parcela(nicho1)
+                    .fechaInicio(LocalDate.now().minusYears(2))
+                    .fechaFin(LocalDate.now().plusYears(48))
+                    .precio(1500.00)
+                    .activa(true)
+                    .build();
+            concesionRepository.save(contrato);
+            
+            System.out.println("✅ DATOS DE PRUEBA CARGADOS CORRECTAMENTE");
         }
     }
 }
