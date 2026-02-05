@@ -1,5 +1,9 @@
 package com.ruben.cementerio.entity.parcela;
 
-public class TipoParcela {
-    
+public enum TipoParcela {
+    NICHO,
+    CRIPTA,
+    SUELO,
+    COLUMBARIO, // Para urnas futuras
+    FOSA
 }

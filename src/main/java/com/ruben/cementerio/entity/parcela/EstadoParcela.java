@@ -1,5 +1,7 @@
 package com.ruben.cementerio.entity.parcela;
 
-public class EstadoParcela {
-    
+public enum EstadoParcela {
+    LIBRE,      // Disponible
+    OCUPADO,    // Ya tiene concesión activa
+    RESERVADO,  // Bloqueado
 }
