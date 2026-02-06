@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ruben.cementerio.dto.UserRequestDTO;
-import com.ruben.cementerio.entity.User;
+import com.ruben.cementerio.dto.UserResponseDTO;
 import com.ruben.cementerio.service.UserService;
 
 @RestController
-@RequestMapping("/api/users") // O la ruta que prefieras
+@RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
@@ -28,20 +28,13 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> listar() {
+    public List<UserResponseDTO> listar() {
         return userService.listarTodos();
     }
 
     @PostMapping
-    public ResponseEntity<User> crear(@RequestBody UserRequestDTO userRequestDTO) {
-        // Ahora sí funciona porque el método existe en el servicio
-        User nuevoUsuario = userService.crear(userRequestDTO);
-        return ResponseEntity.ok(nuevoUsuario);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<User> obtener(@PathVariable Long id) {
-        return ResponseEntity.of(userService.obtenerPorId(id));
+    public ResponseEntity<UserResponseDTO> crear(@RequestBody UserRequestDTO userRequestDTO) {
+        return ResponseEntity.ok(userService.crear(userRequestDTO));
     }
 
     @DeleteMapping("/{id}")

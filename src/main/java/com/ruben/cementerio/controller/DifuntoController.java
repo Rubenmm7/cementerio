@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ruben.cementerio.dto.DifuntoDTO;
 import com.ruben.cementerio.entity.Difunto;
 import com.ruben.cementerio.service.DifuntoService;
 
@@ -31,23 +32,18 @@ public class DifuntoController {
     public List<Difunto> listar() {
         return difuntoService.listarTodos();
     }
+
+    @PostMapping
+    public ResponseEntity<Difunto> crear(@RequestBody DifuntoDTO difuntoDTO) {
+        // Ahora usamos el método que acepta DTO
+        return ResponseEntity.ok(difuntoService.guardarDesdeDTO(difuntoDTO));
+    }
     
     @GetMapping("/buscar")
     public List<Difunto> buscar(@RequestParam String query) {
-        // Busca por nombre o apellido
         return difuntoService.buscar(query, query);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Difunto> obtener(@PathVariable Long id) {
-        return ResponseEntity.of(difuntoService.obtenerPorId(id));
-    }
-
-    @PostMapping
-    public Difunto crear(@RequestBody Difunto difunto) {
-        return difuntoService.guardar(difunto);
-    }
-    
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         difuntoService.eliminar(id);
