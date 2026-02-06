@@ -15,15 +15,17 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Table(name = "facturas")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "facturas")
 public class Factura {
 
     @Id
@@ -35,25 +37,21 @@ public class Factura {
 
     private LocalDateTime fechaEmision;
     private Double importeTotal;
-    
     private boolean pagada;
-
-    // --- SNAPSHOT DEL CLIENTE (Datos congelados al momento de facturar) ---
     private String clienteNombreSnapshot;
     private String clienteDniSnapshot;
     private String clienteDireccionSnapshot;
-    // ----------------------------------------------------------------------
 
-    // Relación real con el cliente para búsquedas
+    // Relación con el usuario que paga
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private User cliente;
 
-    // Relación con los servicios prestados (Items de la factura)
+    // Relación inversa con servicios prestados
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
     private List<ImplementacionService> serviciosPrestados;
     
-    // Relación con los pagos recibidos
+    // Relación inversa con pagos
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
     private List<Pago> pagos;
 }

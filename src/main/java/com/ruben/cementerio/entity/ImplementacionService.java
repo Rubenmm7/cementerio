@@ -1,26 +1,37 @@
 package com.ruben.cementerio.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
+@Entity
+@Table(name = "implementacion_service")
+@Getter
+@Setter
 @NoArgsConstructor
-@Entity(name = "implementacionService")
+@AllArgsConstructor
+@Builder
 public class ImplementacionService {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    private Date fecha_realizacion;
+    private Long id;
+
+    @Column(name = "fecha_realizacion")
+    private LocalDateTime fechaRealizacion;
+
     private String foto;
 
     @ManyToOne
