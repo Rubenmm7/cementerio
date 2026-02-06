@@ -2,6 +2,8 @@ package com.ruben.cementerio.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,5 +41,6 @@ public class Ayuntamiento {
     private String direccion;
 
     @OneToMany(mappedBy = "ayuntamiento", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Cementerio> cementerios;
 }

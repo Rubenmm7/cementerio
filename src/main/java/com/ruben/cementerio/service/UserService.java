@@ -1,48 +1,56 @@
 package com.ruben.cementerio.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ruben.cementerio.dto.UserRequestDTO;
-import com.ruben.cementerio.dto.UserResponseDTO;
-import com.ruben.cementerio.entity.Rol;
 import com.ruben.cementerio.entity.User;
-import com.ruben.cementerio.mapper.UserMapper;
-import com.ruben.cementerio.repository.RolRepository;
 import com.ruben.cementerio.repository.UserRepository;
 
 @Service
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RolRepository rolRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper; // Usamos esto para convertir DTO a Entity
 
-    public UserService(UserRepository userRepository, RolRepository rolRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
         this.userRepository = userRepository;
-        this.rolRepository = rolRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
     }
 
-    public UserResponseDTO crear(UserRequestDTO dto) {
-
-        //Buscar el rol en BD
-        Rol rol = rolRepository.findByTipo(dto.getRol())
-            .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
-
-        //Convertir DTO a entidad
-        User user = UserMapper.toEntity(dto, rol);
-
-        //Guardar
-        User guardado = userRepository.save(user);
-
-        //Devolvemos respuesta
-        return UserMapper.toResponse(guardado);
+    public List<User> listarTodos() {
+        return userRepository.findAll();
     }
 
-    public List<UserResponseDTO> listar() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserMapper::toResponse)
-                .toList();
+    // ESTE ES EL MÉTODO QUE FALTABA Y CAUSABA EL ERROR
+    public User crear(UserRequestDTO dto) {
+        // 1. Convertimos DTO a Entidad User
+        User user = modelMapper.map(dto, User.class);
+        
+        // 2. Encriptamos contraseña (IMPORTANTE)
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        
+        // 3. Guardamos
+        return userRepository.save(user);
+    }
+
+    public Optional<User> obtenerPorId(Long id) {
+        return userRepository.findById(id);
+    }
+    
+    public Optional<User> buscarPorEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public void eliminar(Long id) {
+        userRepository.deleteById(id);
     }
 }

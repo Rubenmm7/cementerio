@@ -1,13 +1,14 @@
 package com.ruben.cementerio.util;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 public class DateUtils {
-
-    //Clase de utils para fechas que podemos utilizar para no repetir codigo de manejo de fechas
-    //Puedes añadir métodos aquí para formatear fechas, calcular diferencias, etc.
     
+    private static final DateTimeFormatter FORMATO_ESPANOL = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-
-
-
-    
+    public static String formatearFecha(LocalDate fecha) {
+        if (fecha == null) return "";
+        return fecha.format(FORMATO_ESPANOL);
+    }
 }

@@ -10,4 +10,6 @@ import com.ruben.cementerio.entity.Cementerio;
 @Repository
 public interface CementerioRepository extends JpaRepository<Cementerio, Long> {
     List<Cementerio> findByAyuntamientoId(Long ayuntamientoId);
+    List<Cementerio> findByNombreContainingIgnoreCase(String nombre);
+
 }

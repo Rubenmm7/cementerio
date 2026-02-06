@@ -2,6 +2,8 @@ package com.ruben.cementerio.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,6 +38,7 @@ public class Zona {
     //Zona pertenece a Cementerio
     @ManyToOne
     @JoinColumn(name = "cementerio_id", nullable = false)
+    @JsonIgnore
     private Cementerio cementerio;
 
     // Una zona tiene muchas parcelas (nichos, suelos, etc.)

@@ -1,5 +1,6 @@
 package com.ruben.cementerio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ruben.cementerio.entity.parcela.EstadoParcela;
 import com.ruben.cementerio.entity.parcela.TipoParcela;
 
@@ -43,5 +44,6 @@ public class Parcela {
 
     @ManyToOne
     @JoinColumn(name = "zona_id")
+    @JsonIgnore
     private Zona zona;
 }

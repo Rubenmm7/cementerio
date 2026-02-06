@@ -1,9 +1,13 @@
 package com.ruben.cementerio.mapper;
 
-public class ModelMapperConfig {
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-    // para transformar datos de un objeto a otro objeto, por default si el nombre no es dificil sabe hacerlo solo.
-    //MapStruct es mas serio que model mapper, hay que meter las dependencias en el pom.xml
-    
-    
+@Configuration
+public class ModelMapperConfig {
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 }

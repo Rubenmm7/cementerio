@@ -69,9 +69,10 @@ public class InitializeData implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // 1. Roles
+        // 0. Limpieza preventiva de roles inválidos si existieran
         try { rolRepository.deleteInvalidRoles(); } catch (Exception e) {}
 
+        // 1. CREACIÓN DE ROLES (Si no existen)
         Rol roleAdmin = rolRepository.findByTipo(TipoRol.SUPERADMIN)
                 .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.SUPERADMIN).build()));
         Rol roleOperador = rolRepository.findByTipo(TipoRol.OPERADOR)
@@ -79,20 +80,20 @@ public class InitializeData implements CommandLineRunner {
         Rol roleCliente = rolRepository.findByTipo(TipoRol.CLIENTE)
                 .orElseGet(() -> rolRepository.save(Rol.builder().tipo(TipoRol.CLIENTE).build()));
 
-        // 2. Servicios disponibles
+        // 2. CREACIÓN DE SERVICIOS
         if (servicioRepository.count() == 0) {
             servicioRepository.saveAll(List.of(
-                Servicio.builder().tipo("Limpieza de Lápidas").precioBase(50.0).descripcion("Limpieza completa manual").build(),
-                Servicio.builder().tipo("Jardinería").precioBase(30.0).descripcion("Cambio de flores y poda").build(),
-                Servicio.builder().tipo("Inhumación").precioBase(300.0).descripcion("Servicio de enterramiento").build(),
-                Servicio.builder().tipo("Exhumación").precioBase(500.0).descripcion("Retirada de restos").build()
+                Servicio.builder().tipo("Limpieza de Lápidas").precioBase(50.0).descripcion("Limpieza completa manual y pulido").build(),
+                Servicio.builder().tipo("Jardinería").precioBase(30.0).descripcion("Cambio de flores frescas y poda de arbustos").build(),
+                Servicio.builder().tipo("Inhumación").precioBase(300.0).descripcion("Servicio de apertura y cierre de nicho/tumba").build(),
+                Servicio.builder().tipo("Mantenimiento Anual").precioBase(120.0).descripcion("Revisión y limpieza trimestral").build()
             ));
         }
 
-        // 3. Ayuntamientos y Cementerios Reales
+        // 3. ESTRUCTURA: AYUNTAMIENTOS -> CEMENTERIOS -> ZONAS -> PARCELAS
         if (ayuntamientoRepository.count() == 0) {
             
-            // CASO 1: Madrid
+            // --- CASO 1: MADRID ---
             Ayuntamiento aytoMadrid = Ayuntamiento.builder()
                     .nombre("Ayuntamiento de Madrid")
                     .direccion("Plaza de Cibeles, 1")
@@ -107,23 +108,38 @@ public class InitializeData implements CommandLineRunner {
                     .provincia("Madrid")
                     .codigoPostal("28017")
                     .emailContacto("cementerios@madrid.es")
+                    .imagenRuta("assets/img/almudena.jpg") // Ruta simulada para el frontend
                     .ayuntamiento(aytoMadrid)
                     .build();
             cementerioRepository.save(almudena);
 
-            // Zonas Almudena
-            Zona zonaAntigua = Zona.builder().nombre("Zona Antigua - Patio 1").numeroFilas(10).numeroColumnas(20).cementerio(almudena).build();
-            Zona zonaNueva = Zona.builder().nombre("Ampliación Norte").numeroFilas(15).numeroColumnas(15).cementerio(almudena).build();
+            // Zonas de la Almudena
+            Zona zonaAntigua = Zona.builder().nombre("Zona Antigua - Patio 1").numeroFilas(5).numeroColumnas(10).cementerio(almudena).build();
+            Zona zonaNueva = Zona.builder().nombre("Ampliación Norte").numeroFilas(8).numeroColumnas(8).cementerio(almudena).build();
             zonaRepository.saveAll(List.of(zonaAntigua, zonaNueva));
 
-            // Parcelas (Ejemplo rápido)
+            // Parcelas (Nichos y Tumbas)
+            // Llenamos la zona antigua con 5 nichos ocupados
             for(int i=1; i<=5; i++) {
-                parcelaRepository.save(Parcela.builder().fila(1).columna(i).tipo(TipoParcela.NICHO).estado(EstadoParcela.OCUPADO).capacidad(3).zona(zonaAntigua).build());
+                parcelaRepository.save(Parcela.builder()
+                    .fila(1).columna(i)
+                    .tipo(TipoParcela.NICHO)
+                    .estado(EstadoParcela.OCUPADO) // Ya tienen dueño
+                    .capacidad(3)
+                    .zona(zonaAntigua).build());
             }
-            parcelaRepository.save(Parcela.builder().fila(2).columna(1).tipo(TipoParcela.SUELO).estado(EstadoParcela.LIBRE).capacidad(1).zona(zonaNueva).build());
+            // Llenamos la zona nueva con parcelas libres
+            for(int i=1; i<=3; i++) {
+                 parcelaRepository.save(Parcela.builder()
+                    .fila(1).columna(i)
+                    .tipo(TipoParcela.SUELO)
+                    .estado(EstadoParcela.LIBRE) // Disponibles para comprar
+                    .capacidad(4)
+                    .zona(zonaNueva).build());
+            }
 
 
-            // CASO 2: Barcelona
+            // --- CASO 2: BARCELONA ---
             Ayuntamiento aytoBcn = Ayuntamiento.builder()
                     .nombre("Ajuntament de Barcelona")
                     .direccion("Plaça de Sant Jaume, 1")
@@ -138,39 +154,51 @@ public class InitializeData implements CommandLineRunner {
                     .provincia("Barcelona")
                     .codigoPostal("08038")
                     .emailContacto("info@cbsa.cat")
+                    .imagenRuta("assets/img/montjuic.jpg")
                     .ayuntamiento(aytoBcn)
                     .build();
             cementerioRepository.save(montjuic);
 
-            // 4. Usuarios del Sistema
+            Zona zonaVistas = Zona.builder().nombre("Zona Vistas al Mar").numeroFilas(4).numeroColumnas(4).cementerio(montjuic).build();
+            zonaRepository.save(zonaVistas);
             
-            // ADMIN GLOBAL
-            if (userRepository.findByEmail("admin@aeternum.com").isEmpty()) {
+            // Una parcela VIP en Barcelona
+            parcelaRepository.save(Parcela.builder()
+                    .fila(1).columna(1)
+                    .tipo(TipoParcela.CRIPTA)
+                    .estado(EstadoParcela.LIBRE)
+                    .capacidad(10)
+                    .zona(zonaVistas).build());
+
+            // 4. USUARIOS DEL SISTEMA
+            
+            // ADMIN (Para que puedas entrar al panel de control)
+            if (userRepository.findByEmail("admin@cementerio.com").isEmpty()) {
                 User admin = User.builder()
                         .nombre("Rubén Admin")
-                        .email("admin@aeternum.com")
-                        .password(passwordEncoder.encode("admin123"))
+                        .email("admin@cementerio.com") // USUARIO: admin@cementerio.com
+                        .password(passwordEncoder.encode("admin123")) // PASSWORD: admin123
                         .telefono("600111222")
-                        .direccion("Oficinas Centrales")
+                        .direccion("Oficina Central")
                         .roles(Set.of(roleAdmin))
-                        .ayuntamiento(aytoMadrid) 
+                        .ayuntamiento(aytoMadrid) // El admin pertenece a una org, ej: Madrid
                         .build();
                 userRepository.save(admin);
             }
 
-            // OPERARIO MADRID
+            // OPERARIO (Para pruebas de trabajador)
             User operario = User.builder()
                     .nombre("Paco Operario")
                     .email("paco@madrid.es")
                     .password(passwordEncoder.encode("paco123"))
                     .telefono("600333444")
-                    .direccion("Calle Trabajo 5")
+                    .direccion("C/ Trabajo, 5")
                     .roles(Set.of(roleOperador))
                     .ayuntamiento(aytoMadrid)
                     .build();
             userRepository.save(operario);
 
-            // CLIENTE FAMILIA
+            // CLIENTE / FAMILIA (Quien paga y tiene los difuntos)
             Cliente familiaGomez = new Cliente();
             familiaGomez.setApellidos("Familia Gómez");
             familiaGomez.setDni("12345678A");
@@ -178,42 +206,50 @@ public class InitializeData implements CommandLineRunner {
 
             User userGomez = User.builder()
                     .nombre("María Gómez")
-                    .email("maria@familia.com")
+                    .email("maria@familia.com") // Login del cliente
                     .password(passwordEncoder.encode("maria123"))
                     .telefono("666777888")
-                    .direccion("Calle Pez 22")
+                    .direccion("Calle Pez, 22")
                     .roles(Set.of(roleCliente))
-                    .cliente(familiaGomez)
+                    .cliente(familiaGomez) // Vinculado a la familia
                     .ayuntamiento(aytoMadrid)
                     .build();
             userRepository.save(userGomez);
 
-            // 5. Difuntos y Concesiones
-            Parcela tumbaAbuelo = parcelaRepository.findAll().get(0); // Cogemos la primera que creamos
+            // 5. DIFUNTOS Y CONCESIONES (Datos Reales)
             
-            Difunto difunto1 = Difunto.builder()
-                    .nombre("Antonio")
-                    .apellidos("Gómez Pérez")
-                    .dni("00112233X")
-                    .fechaNacimiento(LocalDate.of(1930, 1, 1))
-                    .fechaDefuncion(LocalDate.of(2023, 12, 1))
-                    .fechaEnterramiento(LocalDate.of(2023, 12, 2))
-                    .biografia("Amante del ajedrez y su familia.")
-                    .parcela(tumbaAbuelo)
-                    .build();
-            difuntoRepository.save(difunto1);
+            // Recuperamos una parcela de Madrid creada arriba
+            Parcela tumbaAbuelo = parcelaRepository.findAll().stream()
+                    .filter(p -> p.getZona().getCementerio().getNombre().contains("Almudena"))
+                    .findFirst().orElse(null);
+            
+            if(tumbaAbuelo != null) {
+                // Creamos al difunto
+                Difunto difunto1 = Difunto.builder()
+                        .nombre("Antonio")
+                        .apellidos("Gómez Pérez")
+                        .dni("00112233X")
+                        .fechaNacimiento(LocalDate.of(1930, 1, 1))
+                        .fechaDefuncion(LocalDate.of(2023, 12, 1))
+                        .fechaEnterramiento(LocalDate.of(2023, 12, 2))
+                        .biografia("Amante del ajedrez, padre de 3 hijos y abuelo orgulloso. Descansa en paz.")
+                        .parcela(tumbaAbuelo)
+                        .build();
+                difuntoRepository.save(difunto1);
 
-            Concesion concesion = Concesion.builder()
-                    .cliente(familiaGomez)
-                    .parcela(tumbaAbuelo)
-                    .fechaInicio(LocalDate.now().minusYears(1))
-                    .fechaFin(LocalDate.now().plusYears(49))
-                    .precio(1500.00)
-                    .activa(true)
-                    .build();
-            concesionRepository.save(concesion);
+                // Creamos la concesión (el contrato de la tumba)
+                Concesion concesion = Concesion.builder()
+                        .cliente(familiaGomez)
+                        .parcela(tumbaAbuelo)
+                        .fechaInicio(LocalDate.now().minusYears(1)) // Empezó hace un año
+                        .fechaFin(LocalDate.now().plusYears(49))    // Dura 50 años
+                        .precio(1500.00)
+                        .activa(true)
+                        .build();
+                concesionRepository.save(concesion);
+            }
 
-            System.out.println("DATOS CARGADOS: Madrid, Barcelona, Usuarios y Difuntos.");
+            System.out.println("✅ DATOS CARGADOS CORRECTAMENTE: Madrid, Barcelona, Usuarios y Difuntos.");
         }
     }
 }
