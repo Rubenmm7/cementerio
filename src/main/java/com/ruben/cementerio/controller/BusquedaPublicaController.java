@@ -12,7 +12,7 @@ import com.ruben.cementerio.entity.Difunto;
 import com.ruben.cementerio.service.DifuntoService;
 
 @RestController
-@RequestMapping("/api/public/busqueda")
+@RequestMapping("/api/public")
 @CrossOrigin(origins = "http://localhost:4200")
 public class BusquedaPublicaController {
 
@@ -22,10 +22,14 @@ public class BusquedaPublicaController {
         this.difuntoService = difuntoService;
     }
 
-    // Endpoint público para buscar difuntos por nombre/apellido
-    // Ejemplo: /api/public/busqueda?q=Garcia
-    @GetMapping
-    public List<Difunto> buscarDifuntos(@RequestParam("q") String query) {
-        return difuntoService.buscar(query, query);
+    // Endpoint: /api/public/buscar
+    @GetMapping("/buscar")
+    public List<Difunto> buscarDifuntos(
+            @RequestParam(value = "ayuntamientoId", required = false) Long ayuntamientoId,
+            @RequestParam(value = "cementerioId", required = false) Long cementerioId,
+            @RequestParam(value = "nombre", required = false) String nombre,
+            @RequestParam(value = "apellido", required = false) String apellido
+    ) {
+        return difuntoService.buscarAvanzado(ayuntamientoId, cementerioId, nombre, apellido);
     }
 }

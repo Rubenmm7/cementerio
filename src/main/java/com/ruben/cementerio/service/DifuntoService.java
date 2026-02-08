@@ -31,6 +31,10 @@ public class DifuntoService {
         return difuntoRepository.findAll();
     }
 
+    public List<Difunto> buscarAvanzado(Long ayuntamientoId, Long cementerioId, String nombre, String apellido) {
+        return difuntoRepository.buscarAvanzado(ayuntamientoId, cementerioId, nombre, apellido);
+    }
+
     public Difunto guardarDesdeDTO(DifuntoDTO dto) {
         Difunto difunto = modelMapper.map(dto, Difunto.class);
 
