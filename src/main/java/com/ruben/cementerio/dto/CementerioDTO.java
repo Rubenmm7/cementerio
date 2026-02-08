@@ -9,6 +9,9 @@ public class CementerioDTO {
     private String direccion;
     private String poblacion;
     private String provincia;
+    private String codigoPostal;
     private String emailContacto;
-    private String nombreAyuntamiento; // Para mostrarlo sin traer todo el objeto
+    private String imagenRuta;
+    private Long ayuntamientoId; 
+    private String nombreAyuntamiento; 
 }

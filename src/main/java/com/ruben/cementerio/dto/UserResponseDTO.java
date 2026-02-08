@@ -19,5 +19,7 @@ public class UserResponseDTO {
     private String email;
     private String direccion;
     private TipoRol role;
+    private Long ayuntamientoId;
+    private String nombreAyuntamiento;
  
 }

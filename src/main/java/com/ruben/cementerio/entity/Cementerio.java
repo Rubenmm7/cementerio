@@ -1,23 +1,12 @@
 package com.ruben.cementerio.entity;
 
 import java.util.List;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -34,15 +23,14 @@ public class Cementerio {
     private String provincia;
     private String codigoPostal;
     private String emailContacto;
-
     private String imagenRuta;
-
 
     @ManyToOne
     @JoinColumn(name = "ayuntamiento_id", nullable = false)
-    private Ayuntamiento ayuntamiento; // Un ayuntamiento tiene varios cementerios
+    @ToString.Exclude
+    private Ayuntamiento ayuntamiento;
 
-    // Un cementerio tiene muchas zonas
     @OneToMany(mappedBy = "cementerio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Zona> zonas;
 }

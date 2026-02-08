@@ -1,25 +1,13 @@
 package com.ruben.cementerio.entity;
 
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -31,17 +19,16 @@ public class Zona {
     private Long id;
     private String nombre;
 
-    // Dimensiones para pintar el mapa cuadriculado
-    private int numeroFilas;    // Filas y columnas de cada zona
+    private int numeroFilas;
     private int numeroColumnas;
 
-    //Zona pertenece a Cementerio
     @ManyToOne
     @JoinColumn(name = "cementerio_id", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private Cementerio cementerio;
 
-    // Una zona tiene muchas parcelas (nichos, suelos, etc.)
     @OneToMany(mappedBy = "zona", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Parcela> parcelas;
 }

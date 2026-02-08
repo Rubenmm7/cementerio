@@ -6,7 +6,10 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ruben.cementerio.dto.CementerioDTO;
+import com.ruben.cementerio.entity.Ayuntamiento;
 import com.ruben.cementerio.entity.Cementerio;
+import com.ruben.cementerio.repository.AyuntamientoRepository;
 import com.ruben.cementerio.repository.CementerioRepository;
 
 @Service
@@ -14,9 +17,12 @@ import com.ruben.cementerio.repository.CementerioRepository;
 public class CementerioService {
 
     private final CementerioRepository cementerioRepository;
+    private final AyuntamientoRepository ayuntamientoRepository;
 
-    public CementerioService(CementerioRepository cementerioRepository) {
+    public CementerioService(CementerioRepository cementerioRepository, 
+                             AyuntamientoRepository ayuntamientoRepository) {
         this.cementerioRepository = cementerioRepository;
+        this.ayuntamientoRepository = ayuntamientoRepository;
     }
 
     public List<Cementerio> listarTodos() {
@@ -27,22 +33,35 @@ public class CementerioService {
         return cementerioRepository.findById(id);
     }
 
-    public Cementerio guardar(Cementerio cementerio) {
-        return cementerioRepository.save(cementerio);
+    public Cementerio crear(CementerioDTO dto) {
+        Cementerio cementerio = new Cementerio();
+        return mapearYGuardar(cementerio, dto);
     }
 
-    public Optional<Cementerio> actualizar(Long id, Cementerio cementerioActualizado) {
+    public Optional<Cementerio> actualizar(Long id, CementerioDTO dto) {
         return cementerioRepository.findById(id)
-                .map(cementerioExistente -> {
-                    cementerioExistente.setNombre(cementerioActualizado.getNombre());
-                    cementerioExistente.setDireccion(cementerioActualizado.getDireccion());
-                    cementerioExistente.setPoblacion(cementerioActualizado.getPoblacion());
-                    cementerioExistente.setProvincia(cementerioActualizado.getProvincia());
-                    cementerioExistente.setCodigoPostal(cementerioActualizado.getCodigoPostal());
-                    cementerioExistente.setEmailContacto(cementerioActualizado.getEmailContacto());
-                    cementerioExistente.setImagenRuta(cementerioActualizado.getImagenRuta());
-                    return cementerioRepository.save(cementerioExistente);
-                });
+                .map(cementerioExistente -> mapearYGuardar(cementerioExistente, dto));
+    }
+
+    private Cementerio mapearYGuardar(Cementerio cementerio, CementerioDTO dto) {
+        cementerio.setNombre(dto.getNombre());
+        cementerio.setDireccion(dto.getDireccion());
+        cementerio.setPoblacion(dto.getPoblacion());
+        cementerio.setProvincia(dto.getProvincia());
+        cementerio.setCodigoPostal(dto.getCodigoPostal());
+        cementerio.setEmailContacto(dto.getEmailContacto());
+        cementerio.setImagenRuta(dto.getImagenRuta());
+
+        // BUSCAR Y ASIGNAR AYUNTAMIENTO
+        if (dto.getAyuntamientoId() != null) {
+            Ayuntamiento ayuntamiento = ayuntamientoRepository.findById(dto.getAyuntamientoId())
+                    .orElseThrow(() -> new RuntimeException("Ayuntamiento no encontrado con ID: " + dto.getAyuntamientoId()));
+            cementerio.setAyuntamiento(ayuntamiento);
+        } else {
+            throw new IllegalArgumentException("El ID del ayuntamiento es obligatorio");
+        }
+
+        return cementerioRepository.save(cementerio);
     }
 
     public void eliminar(Long id) {

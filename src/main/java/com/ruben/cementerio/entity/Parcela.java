@@ -3,23 +3,12 @@ package com.ruben.cementerio.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ruben.cementerio.entity.parcela.EstadoParcela;
 import com.ruben.cementerio.entity.parcela.TipoParcela;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -30,7 +19,6 @@ public class Parcela {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Coordenadas para pintar el mapa
     private Integer fila;
     private Integer columna;
 
@@ -40,10 +28,11 @@ public class Parcela {
     @Enumerated(EnumType.STRING)
     private EstadoParcela estado;
 
-    private Integer capacidad; // Cuantos difuntos caben
+    private Integer capacidad;
 
     @ManyToOne
     @JoinColumn(name = "zona_id")
     @JsonIgnore
+    @ToString.Exclude
     private Zona zona;
 }

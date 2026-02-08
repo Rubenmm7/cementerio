@@ -3,16 +3,9 @@ package com.ruben.cementerio.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.ruben.cementerio.dto.CementerioDTO;
 import com.ruben.cementerio.entity.Cementerio;
 import com.ruben.cementerio.service.CementerioService;
 
@@ -38,13 +31,14 @@ public class CementerioController {
     }
 
     @PostMapping
-    public Cementerio crear(@RequestBody Cementerio cementerio) {
-        return cementerioService.guardar(cementerio);
+    public ResponseEntity<Cementerio> crear(@RequestBody CementerioDTO dto) {
+        Cementerio nuevo = cementerioService.crear(dto);
+        return ResponseEntity.ok(nuevo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cementerio> actualizar(@PathVariable Long id, @RequestBody Cementerio cementerio) {
-        return cementerioService.actualizar(id, cementerio)
+    public ResponseEntity<Cementerio> actualizar(@PathVariable Long id, @RequestBody CementerioDTO dto) {
+        return cementerioService.actualizar(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

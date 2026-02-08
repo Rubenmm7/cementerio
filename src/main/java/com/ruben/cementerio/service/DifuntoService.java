@@ -18,7 +18,7 @@ import com.ruben.cementerio.repository.ParcelaRepository;
 public class DifuntoService {
 
     private final DifuntoRepository difuntoRepository;
-    private final ParcelaRepository parcelaRepository; // Necesario para buscar la parcela
+    private final ParcelaRepository parcelaRepository;
     private final ModelMapper modelMapper;
 
     public DifuntoService(DifuntoRepository difuntoRepository, ParcelaRepository parcelaRepository, ModelMapper modelMapper) {
@@ -31,11 +31,9 @@ public class DifuntoService {
         return difuntoRepository.findAll();
     }
 
-    // CREAR usando DTO
     public Difunto guardarDesdeDTO(DifuntoDTO dto) {
         Difunto difunto = modelMapper.map(dto, Difunto.class);
 
-        // Si viene un ID de parcela, buscamos la entidad y la asignamos
         if (dto.getParcelaId() != null) {
             Parcela parcela = parcelaRepository.findById(dto.getParcelaId())
                     .orElseThrow(() -> new RuntimeException("Parcela no encontrada con ID: " + dto.getParcelaId()));
@@ -55,5 +53,29 @@ public class DifuntoService {
 
     public void eliminar(Long id) {
         difuntoRepository.deleteById(id);
+    }
+
+    public Optional<Difunto> actualizar(Long id, DifuntoDTO dto) {
+        return difuntoRepository.findById(id)
+            .map(difuntoExistente -> {
+                difuntoExistente.setNombre(dto.getNombre());
+                difuntoExistente.setApellidos(dto.getApellidos());
+                difuntoExistente.setDni(dto.getDni());
+                difuntoExistente.setFechaNacimiento(dto.getFechaNacimiento());
+                difuntoExistente.setFechaDefuncion(dto.getFechaDefuncion());
+                difuntoExistente.setFechaEnterramiento(dto.getFechaEnterramiento());
+                difuntoExistente.setBiografia(dto.getBiografia());
+                difuntoExistente.setFotoUrl(dto.getFotoUrl());
+                
+                if (dto.getParcelaId() != null) {
+                    Parcela parcela = parcelaRepository.findById(dto.getParcelaId())
+                        .orElseThrow(() -> new RuntimeException("Parcela no encontrada con ID: " + dto.getParcelaId()));
+                    difuntoExistente.setParcela(parcela);
+                } else {
+                    difuntoExistente.setParcela(null);
+                }
+
+                return difuntoRepository.save(difuntoExistente);
+            });
     }
 }
