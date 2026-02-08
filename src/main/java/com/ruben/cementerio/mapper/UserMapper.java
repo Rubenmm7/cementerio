@@ -13,10 +13,10 @@ public class UserMapper {
     public static User toEntity(UserRequestDTO dto, Rol rol) {
        return User.builder()
                 .nombre(dto.getNombre())
+                .apellidos(dto.getApellidos())
                 .email(dto.getEmail())
                 .password(dto.getPassword())
                 .telefono(dto.getTelefono())
-                .direccion(dto.getDireccion())
                 .roles(Set.of(rol))
                 .build();
     }
@@ -26,8 +26,9 @@ public class UserMapper {
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .nombre(user.getNombre())
+                .apellidos(user.getApellidos())
                 .email(user.getEmail())
-                .rol(user.getRoles().stream().findFirst().map(Rol::getTipo).orElse(null))
+                .role(user.getRoles().stream().findFirst().map(Rol::getTipo).orElse(null))
                 .build();
     }
 }

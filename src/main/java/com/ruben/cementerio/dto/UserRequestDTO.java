@@ -14,10 +14,11 @@ import lombok.Setter;
 public class UserRequestDTO {
 
     private String nombre;
+    private String apellidos;
     private String email;
     private String password;
     private String telefono;
     private String direccion;
-    private TipoRol rol;
+    private Long ayuntamientoId;
+    private TipoRol role;
 }
-

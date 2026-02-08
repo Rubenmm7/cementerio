@@ -12,9 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponseDTO {
-    private Integer id;
+    private Long id;
     private String nombre;
+    private String apellidos;
+    private String telefono;
     private String email;
-    private TipoRol rol;
+    private String direccion;
+    private TipoRol role;
  
 }

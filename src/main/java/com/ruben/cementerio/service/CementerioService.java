@@ -31,6 +31,20 @@ public class CementerioService {
         return cementerioRepository.save(cementerio);
     }
 
+    public Optional<Cementerio> actualizar(Long id, Cementerio cementerioActualizado) {
+        return cementerioRepository.findById(id)
+                .map(cementerioExistente -> {
+                    cementerioExistente.setNombre(cementerioActualizado.getNombre());
+                    cementerioExistente.setDireccion(cementerioActualizado.getDireccion());
+                    cementerioExistente.setPoblacion(cementerioActualizado.getPoblacion());
+                    cementerioExistente.setProvincia(cementerioActualizado.getProvincia());
+                    cementerioExistente.setCodigoPostal(cementerioActualizado.getCodigoPostal());
+                    cementerioExistente.setEmailContacto(cementerioActualizado.getEmailContacto());
+                    cementerioExistente.setImagenRuta(cementerioActualizado.getImagenRuta());
+                    return cementerioRepository.save(cementerioExistente);
+                });
+    }
+
     public void eliminar(Long id) {
         cementerioRepository.deleteById(id);
     }

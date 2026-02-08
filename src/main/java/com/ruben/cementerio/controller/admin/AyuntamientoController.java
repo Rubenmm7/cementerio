@@ -17,7 +17,7 @@ import com.ruben.cementerio.entity.Ayuntamiento;
 import com.ruben.cementerio.service.AyuntamientoService;
 
 @RestController
-@RequestMapping("/api/admin/ayuntamientos")
+@RequestMapping("/api/ayuntamientos")
 @CrossOrigin(origins = "http://localhost:4200")
 public class AyuntamientoController {
 

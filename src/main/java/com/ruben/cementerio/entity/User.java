@@ -30,10 +30,13 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false, length = 45)
     private String nombre;
+
+    @Column(nullable = true, length = 50)
+    private String apellidos;
 
     @Column(nullable = false, unique = true, length = 245)
     private String email;

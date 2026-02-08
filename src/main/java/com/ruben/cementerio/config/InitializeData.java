@@ -176,12 +176,13 @@ public class InitializeData implements CommandLineRunner {
             if (userRepository.findByEmail("admin@cementerio.com").isEmpty()) {
                 User admin = User.builder()
                         .nombre("Rubén Admin")
+                        .apellidos("Maderas")
                         .email("admin@cementerio.com") // USUARIO: admin@cementerio.com
                         .password(passwordEncoder.encode("admin123")) // PASSWORD: admin123
                         .telefono("600111222")
-                        .direccion("Oficina Central")
+                        .direccion("Plaza Mayor, 1") // Añadir una dirección
                         .roles(Set.of(roleAdmin))
-                        .ayuntamiento(aytoMadrid) // El admin pertenece a una org, ej: Madrid
+                        .ayuntamiento(aytoMadrid)
                         .build();
                 userRepository.save(admin);
             }
@@ -200,14 +201,14 @@ public class InitializeData implements CommandLineRunner {
 
             // CLIENTE / FAMILIA (Quien paga y tiene los difuntos)
             Cliente familiaGomez = new Cliente();
-            familiaGomez.setApellidos("Familia Gómez");
+            familiaGomez.setApellidos("Familia Navas");
             familiaGomez.setDni("12345678A");
             clienteRepository.save(familiaGomez);
 
             User userGomez = User.builder()
-                    .nombre("María Gómez")
-                    .email("maria@familia.com") // Login del cliente
-                    .password(passwordEncoder.encode("maria123"))
+                    .nombre("Alba Navas")
+                    .email("alba@familia.com") // Login del cliente
+                    .password(passwordEncoder.encode("alba123"))
                     .telefono("666777888")
                     .direccion("Calle Pez, 22")
                     .roles(Set.of(roleCliente))
